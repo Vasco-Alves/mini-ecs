@@ -4,44 +4,26 @@
 
 namespace me {
 
-	class Registry;
-
 	namespace entity {
 		using entity_id = std::uint32_t;
 		constexpr entity_id null = 0;
 	}
 
-	class Entity {
-	public:
+	// Lightweight handle - just an ID.
+	// No longer holds Registry pointer for safety.
+	struct Entity {
+		entity::entity_id id = entity::null;
+
 		Entity() = default;
-		Entity(entity::entity_id id, Registry* registry) : m_id(id), m_registry(registry) {}
+		Entity(entity::entity_id id) : id(id) {}
 
-		entity::entity_id id() const {
-			return m_id;
-		}
+		bool is_valid() const { return id != entity::null; }
 
-		bool is_valid() const {
-			return m_id != entity::null && m_registry != nullptr;
-		}
+		// Implicit conversion to ID
+		operator entity::entity_id() const { return id; }
 
-		operator bool() const {
-			return is_valid();
-		}
-
-		template <typename T>
-		void add_component(const T& component);
-
-		template <typename T>
-		T* get_component();
-
-		template <typename T>
-		bool has_component() const;
-
-		void destroy();
-
-	private:
-		entity::entity_id m_id = entity::null;
-		Registry* m_registry = nullptr;
+		bool operator==(const Entity& other) const { return id == other.id; }
+		bool operator!=(const Entity& other) const { return id != other.id; }
 	};
 
 } // namespace me
