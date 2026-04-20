@@ -3,4 +3,4 @@ project(mini-ecs)
 
 add_library(mini-ecs INTERFACE)
 
-target_include_directories(mini-ecs INTERFACE include)
+target_include_directories(mini-ecs INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/include")
