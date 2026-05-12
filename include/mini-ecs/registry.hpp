@@ -22,7 +22,9 @@ namespace me {
 		Entity create_entity(const std::string& name = "Entity") {
 			entity::entity_id id = m_nextId++;
 			m_entities[id] = { name, true };
-			return Entity(id);
+
+			// Pass 'this' so the entity knows which Registry owns it!
+			return Entity(id, this);
 		}
 
 		void destroy_entity(entity::entity_id e) {
@@ -94,5 +96,49 @@ namespace me {
 		std::unordered_map<std::type_index, std::unique_ptr<detail::IPool>> m_pools;
 		entity::entity_id m_nextId = 1;
 	};
+
+
+	// =========================================================================
+	// ENTITY INLINE IMPLEMENTATIONS
+	// (Implemented here because the Registry class is now fully defined above!)
+	// =========================================================================
+
+	inline Entity::Entity(entity::entity_id id, Registry* registry)
+		: m_id(id), m_registry(registry) {}
+
+	inline bool Entity::is_valid() const {
+		if (m_id == entity::null || m_registry == nullptr) return false;
+		return m_registry->is_alive(m_id);
+	}
+
+	template <typename T>
+	inline void Entity::add_component(const T& component) {
+		m_registry->add_component<T>(m_id, component);
+	}
+
+	template <typename T>
+	inline T* Entity::try_get_component() {
+		return m_registry->try_get_component<T>(m_id);
+	}
+
+	template <typename T>
+	inline T& Entity::get_component() {
+		// Used when you are 100% sure the entity has the component.
+		return *m_registry->try_get_component<T>(m_id);
+	}
+
+	template <typename T>
+	inline bool Entity::has_component() {
+		return m_registry->has_component<T>(m_id);
+	}
+
+	template <typename T>
+	inline void Entity::remove_component() {
+		m_registry->remove_component<T>(m_id);
+	}
+
+	inline void Entity::destroy() {
+		m_registry->destroy_entity(m_id);
+	}
 
 } // namespace me

@@ -4,26 +4,36 @@
 
 namespace me {
 
+	class Registry;
+
 	namespace entity {
 		using entity_id = std::uint32_t;
 		constexpr entity_id null = 0;
 	}
 
-	// Lightweight handle - just an ID.
-	// No longer holds Registry pointer for safety.
-	struct Entity {
-		entity::entity_id id = entity::null;
-
+	class Entity {
+	public:
 		Entity() = default;
-		Entity(entity::entity_id id) : id(id) {}
+		Entity(entity::entity_id id, Registry* registry);
 
-		bool is_valid() const { return id != entity::null; }
+		bool is_valid() const;
 
 		// Implicit conversion to ID
-		operator entity::entity_id() const { return id; }
+		operator entity::entity_id() const { return m_id; }
+		bool operator==(const Entity& other) const { return m_id == other.m_id && m_registry == other.m_registry; }
+		bool operator!=(const Entity& other) const { return !(*this == other); }
 
-		bool operator==(const Entity& other) const { return id == other.id; }
-		bool operator!=(const Entity& other) const { return id != other.id; }
+		// --- NEW: Object-Oriented Component API ---
+		template <typename T> void add_component(const T& component);
+		template <typename T> T* try_get_component();
+		template <typename T> T& get_component(); // Returns a direct reference!
+		template <typename T> bool has_component();
+		template <typename T> void remove_component();
+		void destroy();
+
+	private:
+		entity::entity_id m_id = entity::null;
+		Registry* m_registry = nullptr;
 	};
 
 } // namespace me
