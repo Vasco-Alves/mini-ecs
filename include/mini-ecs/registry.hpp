@@ -12,18 +12,17 @@ namespace me {
 
 	namespace detail {
 		struct EntityRecord {
-			std::string name;
 			bool alive = true;
 		};
 	}
 
 	class Registry {
 	public:
-		Entity create_entity(const std::string& name = "Entity") {
+		Entity create_entity() {
 			entity::entity_id id = m_nextId++;
-			m_entities[id] = { name, true };
+			m_entities[id] = { true };
 
-			// Pass 'this' so the entity knows which Registry owns it!
+			// Pass 'this' so the entity knows which Registry owns it
 			return Entity(id, this);
 		}
 
@@ -100,7 +99,6 @@ namespace me {
 
 	// =========================================================================
 	// ENTITY INLINE IMPLEMENTATIONS
-	// (Implemented here because the Registry class is now fully defined above!)
 	// =========================================================================
 
 	inline Entity::Entity(entity::entity_id id, Registry* registry)
@@ -123,7 +121,6 @@ namespace me {
 
 	template <typename T>
 	inline T& Entity::get_component() {
-		// Used when you are 100% sure the entity has the component.
 		return *m_registry->try_get_component<T>(m_id);
 	}
 

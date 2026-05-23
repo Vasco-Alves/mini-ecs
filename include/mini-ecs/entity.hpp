@@ -23,13 +23,17 @@ namespace me {
 		bool operator==(const Entity& other) const { return m_id == other.m_id && m_registry == other.m_registry; }
 		bool operator!=(const Entity& other) const { return !(*this == other); }
 
-		// --- NEW: Object-Oriented Component API ---
+		// --- Object-Oriented Component API ---
 		template <typename T> void add_component(const T& component);
 		template <typename T> T* try_get_component();
-		template <typename T> T& get_component(); // Returns a direct reference!
+		template <typename T> T& get_component();
 		template <typename T> bool has_component();
 		template <typename T> void remove_component();
 		void destroy();
+
+		entity::entity_id get_id() const {
+			return m_id;
+		}
 
 	private:
 		entity::entity_id m_id = entity::null;
