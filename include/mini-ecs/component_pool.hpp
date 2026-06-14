@@ -12,6 +12,10 @@ namespace me::detail {
 		virtual void remove(me::entity::entity_id e) = 0;
 		virtual bool has(me::entity::entity_id e) const = 0;
 		virtual void clear() = 0;
+		virtual size_t size() const = 0;
+		// Dense list of entity ids in this pool; lets a view drive iteration
+		// off the smallest pool without knowing the component type.
+		virtual const std::vector<me::entity::entity_id>& entities() const = 0;
 	};
 
 	template <typename T>
@@ -79,8 +83,10 @@ namespace me::detail {
 			std::fill(sparse.begin(), sparse.end(), NONE);
 		}
 
-		size_t size() const { return components.size(); }
+		size_t size() const override { return components.size(); }
 		bool empty() const { return components.empty(); }
+
+		const std::vector<me::entity::entity_id>& entities() const override { return entity_map; }
 	};
 
 } // namespace me::detail

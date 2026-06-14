@@ -9,7 +9,8 @@ Designed to be simple, type-safe, and incredibly easy to drop into any game engi
 - **Header-Only:** No source files to compile. Just link the `include` directory and you're good to go.
 - **Type-Safe:** Uses standard C++ templates and `std::type_index` to manage components securely.
 - **Clean API:** Entity interactions are handled through a safe `Entity` handle class rather than raw IDs.
-- **No Dependencies:** Relies entirely on the C++ Standard Library.
+- **Safe Handles:** Entity ids are recycled and versioned, so stale handles to destroyed entities report as invalid.
+- **No Dependencies:** Relies entirely on the C++ Standard Library (requires **C++17**).
 
 ## Installation
 
@@ -30,8 +31,10 @@ Then, in your project's `CMakeLists.txt`:
 add_subdirectory(vendor/mini-ecs)
 
 # Link it to your executable or library
-target_link_libraries(my_game PUBLIC mini-ecs)`
+target_link_libraries(my_game PUBLIC mini-ecs)
 ```
+
+The library requires **C++17**; linking against `mini-ecs` applies this automatically.
 
 ## Quick Start
 
@@ -81,21 +84,33 @@ int main() {
 
 ### 3. Iterate over Components (Systems)
 
-To update your game, request a `view` of a specific component pool and iterate through it.
+Request a `view` of one or more component types. Each iteration yields the entity
+id followed by a reference to every requested component, so you can unpack them
+with structured bindings:
 
 ```cpp
 void update_physics(me::Registry& registry, float dt) {
-    auto& transforms = registry.view<Transform>();
-    
-    for (auto& [entity_id, transform] : transforms) {
-        // You can use the ID to lookup other components!
-        if (Velocity* vel = registry.try_get_component<Velocity>(entity_id)) {
-            transform.x += vel->vx * dt;
-            transform.y += vel->vy * dt;
-        }
+    for (auto [entity_id, transform, velocity] : registry.view<Transform, Velocity>()) {
+        transform.x += velocity.vx * dt;
+        transform.y += velocity.vy * dt;
     }
 }
 ```
+
+A view only visits entities that own **every** requested component, and it is
+driven by the smallest matching pool — so the cost scales with the rarest
+component rather than the total entity count. A single-component view works the
+same way:
+
+```cpp
+for (auto [entity_id, transform] : registry.view<Transform>()) {
+    transform.y -= 9.8f * dt;
+}
+```
+
+> **Note:** the component bindings are references into the pools, so writing to
+> them updates the components directly. Avoid adding components of a type you are
+> currently iterating over — it may reallocate that pool and invalidate the view.
 
 ## License
 

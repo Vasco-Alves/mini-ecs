@@ -8,13 +8,14 @@ namespace me {
 
 	namespace entity {
 		using entity_id = std::uint32_t;
+		using version = std::uint32_t;
 		constexpr entity_id null = 0;
 	}
 
 	class Entity {
 	public:
 		Entity() = default;
-		Entity(entity::entity_id id, Registry* registry);
+		Entity(entity::entity_id id, entity::version generation, Registry* registry);
 
 		bool is_valid() const;
 
@@ -37,6 +38,7 @@ namespace me {
 
 	private:
 		entity::entity_id m_id = entity::null;
+		entity::version m_generation = 0;
 		Registry* m_registry = nullptr;
 	};
 
