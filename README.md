@@ -64,7 +64,7 @@ int main() {
     me::Registry registry;
 
     // Create an entity handle
-    me::Entity player = registry.create_entity("Player");
+    me::Entity player = registry.create_entity();
 
     // Add components
     player.add_component(Transform{10.0f, 20.0f});
