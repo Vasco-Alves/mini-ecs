@@ -89,6 +89,14 @@ int main() {
 		int none = 0;
 		for (auto [id, tag] : mv.view<Tag>()) { (void)id; (void)tag; ++none; }
 		assert(none == 0);
+
+		// get_entity upgrades a raw view id back into a full handle.
+		for (auto [id, tr] : mv.view<Transform>()) {
+			(void)tr;
+			Entity handle = mv.get_entity(id);
+			assert(handle.is_valid());
+			assert(handle.get_id() == id);
+		}
 	}
 
 	// --- deferred deletion ---------------------------------------------------
@@ -104,6 +112,12 @@ int main() {
 	assert(recycled.get_id() == aid); // index reused
 	assert(recycled.is_valid());
 	assert(!a.is_valid());            // old handle stale via generation bump
+
+	// get_entity hands back the entity that currently owns the id...
+	assert(r.get_entity(aid) == recycled);
+	assert(r.get_entity(aid).is_valid());
+	// ...and a null handle for an id that was never created.
+	assert(!r.get_entity(999999u).is_valid());
 
 	// --- reentrancy: a callback may safely queue more deletions -------------
 	Entity p = r.create_entity();

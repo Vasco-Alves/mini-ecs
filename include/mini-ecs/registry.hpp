@@ -44,6 +44,16 @@ namespace me {
 			return Entity(id, 0, this);
 		}
 
+		// Rebuilds an Entity handle for an existing id, stamping it with the
+		// current generation so its validity tracks whatever entity now owns
+		// that id. Returns a null (invalid) handle if the id was never created.
+		// Handy for turning the raw id from a view back into a handle.
+		Entity get_entity(entity::entity_id e) {
+			auto it = m_entities.find(e);
+			if (it == m_entities.end()) return Entity{};
+			return Entity(e, it->second.generation, this);
+		}
+
 		// =====================================================================
 		// DEFERRED DELETION PIPELINE
 		// =====================================================================

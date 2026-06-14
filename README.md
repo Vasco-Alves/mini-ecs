@@ -112,6 +112,17 @@ for (auto [entity_id, transform] : registry.view<Transform>()) {
 > them updates the components directly. Avoid adding components of a type you are
 > currently iterating over — it may reallocate that pool and invalidate the view.
 
+A view hands you the raw entity id. If you need the full `Entity` handle for it
+(for example to call `add_component`, `has_component`, or `destroy`), upgrade it
+with `get_entity`:
+
+```cpp
+for (auto [id, transform] : registry.view<Transform>()) {
+    me::Entity entity = registry.get_entity(id);
+    if (transform.y < 0.0f) entity.destroy();
+}
+```
+
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
