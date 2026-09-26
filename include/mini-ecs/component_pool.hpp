@@ -2,6 +2,7 @@
 
 #include "mini-ecs/entity.hpp"
 
+#include <algorithm> // std::fill
 #include <vector>
 #include <limits>
 
